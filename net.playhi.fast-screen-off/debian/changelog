@@ -1,3 +1,11 @@
+net.playhi.fast-screen-off (1.1.0.0) unstable; urgency=medium
+
+  * Support X11 and GNOME, KDE and output-power-management Wayland sessions.
+  * Build separate Debian 13 and Deepin 25 packages from the same source.
+  * Modernize metadata, remove generated files and automate release assets.
+
+ -- Playhi <hiplayhi@playhi.net>  Sun, 15 Nov 2026 09:00:00 -0700
+
 net.playhi.fast-screen-off (1.0.1.2) stable; urgency=low
 
   * Change the way of building the package

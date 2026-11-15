@@ -1,0 +1,96 @@
+name: Build Debian and Deepin packages
+
+on:
+  push:
+    branches: [master, main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package for ${{ matrix.target }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: debian13
+            image: debian:13
+          - target: deepin25
+            image: linuxdeepin/deepin:25
+    container:
+      image: ${{ matrix.image }}
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install build and validation tools
+        run: |
+          . /etc/os-release
+          case '${{ matrix.target }}' in
+            debian13) test "$ID" = debian; test "${VERSION_ID%%.*}" = 13 ;;
+            deepin25) test "$ID" = Deepin -o "$ID" = deepin; test "${VERSION_ID%%.*}" = 25 ;;
+          esac
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates git build-essential debhelper python3 shellcheck desktop-file-utils
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check source and backend behavior
+        run: |
+          shellcheck -s sh net.playhi.fast-screen-off/deepin/files/bin/net.playhi.fast-screen-off.sh scripts/build-deb.sh
+          python3 -m unittest discover -s tests -v
+          desktop-file-validate net.playhi.fast-screen-off/deepin/entries/applications/net.playhi.fast-screen-off.desktop
+      - name: Check release tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(dpkg-parsechangelog -l net.playhi.fast-screen-off/debian/changelog -S Version)
+          test "$RELEASE_TAG" = "v$version"
+      - name: Build package
+        run: sh scripts/build-deb.sh '${{ matrix.target }}'
+      - name: Validate and install package
+        run: |
+          python3 scripts/check-deb.py '${{ matrix.target }}' assets/*.deb
+          apt-get install -y ./assets/*.deb
+          if [ '${{ matrix.target }}' = debian13 ]; then
+            fast-screen-off --version
+          else
+            /opt/apps/net.playhi.fast-screen-off/files/bin/net.playhi.fast-screen-off.sh --version
+          fi
+          apt-get purge -y net.playhi.fast-screen-off
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fast-screen-off-${{ matrix.target }}
+          path: assets/*.deb
+          if-no-files-found: error
+
+  release:
+    name: Publish release assets
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: package
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: fast-screen-off-*
+          path: assets
+          merge-multiple: true
+      - name: Generate checksums and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cd assets
+          sha256sum ./*.deb > SHA256SUMS
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --title "Fast Screen Off $RELEASE_TAG" --generate-notes
+          fi
+          gh release upload "$RELEASE_TAG" ./*.deb SHA256SUMS --clobber

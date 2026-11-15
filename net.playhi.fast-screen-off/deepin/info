@@ -1,11 +1,11 @@
 {
     "appid": "net.playhi.fast-screen-off",
     "name": "快速熄屏",
-    "version": "1.0.0.1",
-    "arch": ["amd64","mips64el","mips64","sw_64","arm64"],
+    "version": "1.1.0.0",
+    "arch": ["amd64", "arm64", "loong64", "riscv64", "sw_64", "mips64el"],
     "permissions": {
         "autostart": false,
-        "notification": false,
+        "notification": true,
         "trayicon": false,
         "clipboard": false,
         "account": false,

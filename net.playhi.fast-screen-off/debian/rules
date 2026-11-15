@@ -1,32 +1,38 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-
-# Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
+export FSO_PACKAGE_TARGET ?= debian13
+PACKAGE = net.playhi.fast-screen-off
+DEST = debian/$(PACKAGE)
+APP = $(DEST)/opt/apps/$(PACKAGE)
 
 %:
-	dh "$@"
+	dh $@
+
+override_dh_auto_install:
+ifeq ($(FSO_PACKAGE_TARGET),deepin25)
+	install -d $(APP)
+	cp -r deepin/entries deepin/files $(APP)/
+	install -m 644 deepin/info deepin/LICENSE deepin/README.md $(APP)/
+	chmod 755 $(APP)/files/bin/$(PACKAGE).sh
+	find $(APP)/entries -type f -exec chmod 644 {} +
+else ifeq ($(FSO_PACKAGE_TARGET),debian13)
+	install -Dm755 deepin/files/bin/$(PACKAGE).sh $(DEST)/usr/bin/fast-screen-off
+	install -Dm644 deepin/entries/icons/hicolor/scalable/apps/$(PACKAGE).svg $(DEST)/usr/share/icons/hicolor/scalable/apps/$(PACKAGE).svg
+	install -d $(DEST)/usr/share/applications
+	sed 's|^Exec=.*|Exec=fast-screen-off|' deepin/entries/applications/$(PACKAGE).desktop > $(DEST)/usr/share/applications/$(PACKAGE).desktop
+else
+	$(error Unsupported FSO_PACKAGE_TARGET: $(FSO_PACKAGE_TARGET))
+endif
 
 override_dh_installdocs:
-	mkdir -p debian/net.playhi.fast-screen-off/opt/apps/net.playhi.fast-screen-off/
-	cp -r deepin/* debian/net.playhi.fast-screen-off/opt/apps/net.playhi.fast-screen-off/
-	mkdir -p debian/net.playhi.fast-screen-off/usr/
-	cp -r usr/* debian/net.playhi.fast-screen-off/usr/
-	mkdir -p debian/net.playhi.fast-screen-off/opt/apps/net.playhi.fast-screen-off/files/
-	cp debian/copyright debian/net.playhi.fast-screen-off/opt/apps/net.playhi.fast-screen-off/files/
+ifeq ($(FSO_PACKAGE_TARGET),deepin25)
+	install -Dm644 debian/copyright $(APP)/files/copyright
+else
+	dh_installdocs deepin/README.md
+endif
 
 override_dh_installchangelogs:
-	cp debian/changelog debian/net.playhi.fast-screen-off/opt/apps/net.playhi.fast-screen-off/files/
-	# ./build.sh
-
-override_dh_strip_nondeterminism:
-	# skip
-
-override_dh_dwz:
-	# skip
-
-override_dh_shlibdeps:
-	# skip
-
-override_dh_strip:
-	# skip
+ifeq ($(FSO_PACKAGE_TARGET),deepin25)
+	install -m 644 debian/changelog $(APP)/files/changelog
+else
+	dh_installchangelogs
+endif

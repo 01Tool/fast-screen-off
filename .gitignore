@@ -5,3 +5,11 @@
 *.dsc
 *.tar.gz
 *.tar.xz
+/assets/
+/.validation/
+__pycache__/
+/net.playhi.fast-screen-off/debian/.debhelper/
+/net.playhi.fast-screen-off/debian/debhelper-build-stamp
+/net.playhi.fast-screen-off/debian/files
+/net.playhi.fast-screen-off/debian/*.substvars
+/net.playhi.fast-screen-off/debian/net.playhi.fast-screen-off/

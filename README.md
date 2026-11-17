@@ -36,10 +36,10 @@ upgrade earlier releases. Install **one** variant matching your system:
 
 ```sh
 # Debian 13
-sudo apt install ./net.playhi.fast-screen-off_1.1.0.0_debian13_all.deb
+sudo apt install ./net.playhi.fast-screen-off_2.0.0.0_debian13_all.deb
 
 # Deepin 25
-sudo apt install ./net.playhi.fast-screen-off_1.1.0.0_deepin25_all.deb
+sudo apt install ./net.playhi.fast-screen-off_2.0.0.0_deepin25_all.deb
 ```
 
 The Debian package installs `/usr/bin/fast-screen-off` and the standard desktop
@@ -93,11 +93,17 @@ To release:
 
 1. Update the version together in `debian/changelog`, `deepin/info`, and the
    launcher's `--version` string, all under `net.playhi.fast-screen-off/`.
-2. Commit and push the changes, then push the matching tag, e.g. `v1.1.0.0`.
-3. After both package jobs pass, the workflow creates a GitHub release (or uses
-   the existing one) and uploads both `.deb` files and `SHA256SUMS`.
+2. Add release notes under `docs/releases/<tag>.md`, then commit and push the
+   changes. Wait for both package jobs to pass before pushing the matching tag,
+   e.g. `v2.0.0.0`.
+3. After both tag package jobs pass, the workflow creates a draft GitHub release
+   (or uses the existing one), uploads both `.deb` files and `SHA256SUMS`, and
+   publishes the release. If no notes file exists, GitHub generates the notes.
 
-Tag/package version mismatches fail the build. Only the tag release job receives
+Tags must exactly match the package version: use `v2.0.0.0` for package version
+`2.0.0.0`. Adding a suffix such as `-nightly-1` without changing the package
+version will fail the version check; this workflow publishes stable releases.
+Only the tag release job receives
 `contents: write`; pull requests never publish releases. Rerunning a tag workflow
 replaces assets with the same filenames. The `.deb` filenames include the target;
 the internal package name and version are the same for both variants.

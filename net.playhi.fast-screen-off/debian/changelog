@@ -1,3 +1,11 @@
+net.playhi.fast-screen-off (2.0.0.0) stable; urgency=medium
+
+  * Release the Deepin 25 and Debian 13 upgrade as version 2.
+  * Align package metadata and launcher version with the stable release tag.
+  * Include release notes and publish only after uploading both packages.
+
+ -- Playhi <hiplayhi@playhi.net>  Mon, 16 Nov 2026 09:00:00 -0700
+
 net.playhi.fast-screen-off (1.1.0.0) unstable; urgency=medium
 
   * Support X11 and GNOME, KDE and output-power-management Wayland sessions.

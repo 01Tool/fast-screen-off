@@ -24,7 +24,7 @@ delay=0.5
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --help|-h) usage; exit 0 ;;
-        --version) printf '%s\n' 'fast-screen-off 1.1.0.0'; exit 0 ;;
+        --version) printf '%s\n' 'fast-screen-off 2.0.0.0'; exit 0 ;;
         --delay)
             if [ "$#" -lt 2 ]; then
                 printf '%s\n' 'fast-screen-off: --delay needs a number of seconds' >&2

@@ -12,12 +12,14 @@ Build on Debian 12 amd64 to keep the glibc baseline at 2.36:
 
 ```sh
 sudo apt install ca-certificates curl git python3 file patchelf desktop-file-utils \
-  x11-xserver-utils libglib2.0-bin libnotify-bin wlopm libkf5screen-bin \
+  x11-xserver-utils libglib2.0-bin libnotify-bin libkf5screen-bin \
+  build-essential libwayland-dev pkg-config \
   qt5-qmake qtbase5-dev qtwayland5 libqt5svg5
 sh scripts/build-appimage.sh
 ```
 
-The recipe uses checksum-pinned linuxdeploy and its Qt plugin, packages the
+The recipe builds pinned wlopm sources because Debian 12 does not package it.
+It uses checksum-pinned linuxdeploy and its Qt plugin, packages the
 display helpers and their shared libraries, and includes the Qt Wayland and
 offscreen plugins. It keeps Debian dependency copyright files and a package
 version inventory under `usr/share/doc` inside the AppImage. Host graphics

@@ -83,12 +83,12 @@ jobs:
       - name: Install packaging tools and helpers
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git python3 file patchelf desktop-file-utils x11-xserver-utils libglib2.0-bin libnotify-bin wlopm libkf5screen-bin qt5-qmake qtbase5-dev qtwayland5 libqt5svg5
+          apt-get install -y --no-install-recommends ca-certificates curl git python3 file patchelf desktop-file-utils x11-xserver-utils libglib2.0-bin libnotify-bin build-essential libwayland-dev pkg-config libkf5screen-bin qt5-qmake qtbase5-dev qtwayland5 libqt5svg5
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Bundle helpers and build AppImage
-        run: sh scripts/build-appimage.sh
+        run: sh scripts/ci-run.sh sh scripts/build-appimage.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fast-screen-off-appimage
@@ -110,7 +110,7 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --user --noninteractive flathub org.kde.Sdk//6.10 org.kde.Platform//6.10
       - name: Build bundle and check helpers inside the sandbox
-        run: dbus-run-session -- sh scripts/build-flatpak.sh
+        run: sh scripts/ci-run.sh dbus-run-session -- sh scripts/build-flatpak.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fast-screen-off-flatpak
@@ -133,7 +133,7 @@ jobs:
           sudo apt-get install -y linglong-builder linglong-bin dbus-x11
           ll-builder --version
       - name: Build UAB and check helpers inside the runtime
-        run: dbus-run-session -- sh scripts/build-linglong.sh
+        run: sh scripts/ci-run.sh dbus-run-session -- sh scripts/build-linglong.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fast-screen-off-linglong

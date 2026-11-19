@@ -18,6 +18,13 @@ version=$(python3 "$root/scripts/prepare-portable.py" appimage "$work")
 cd "$work/source"
 sh install.sh "$work/AppDir/usr"
 cd "$work"
+# Debian 12 predates the wlopm package; build against this baseline's libraries.
+curl -fL --retry 3 -o wlopm.tar.gz \
+    https://deb.debian.org/debian/pool/main/w/wlopm/wlopm_0.1.0.orig.tar.gz
+printf '%s\n' '1f3d7d3ff5d43de634b87e6ca951238ad8bef9ef6bdea5b904b8293f7f000fb1  wlopm.tar.gz' | sha256sum -c -
+tar -xf wlopm.tar.gz
+make -C wlopm-0.1.0 -j2
+install -Dm644 wlopm-0.1.0/LICENSE AppDir/usr/share/licenses/wlopm/LICENSE
 curl -fL --retry 3 -o linuxdeploy-x86_64.AppImage \
     https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
 curl -fL --retry 3 -o linuxdeploy-plugin-qt-x86_64.AppImage \
@@ -32,7 +39,7 @@ export EXTRA_PLATFORM_PLUGINS='libqwayland-egl.so;libqwayland-generic.so;libqoff
 export OUTPUT="$output/fast-screen-off_${version}_x86_64.AppImage"
 ./linuxdeploy-x86_64.AppImage --appdir AppDir \
     --executable /usr/bin/xset --executable /usr/bin/gdbus \
-    --executable /usr/bin/wlopm --executable /usr/bin/kscreen-doctor \
+    --executable "$work/wlopm-0.1.0/wlopm" --executable /usr/bin/kscreen-doctor \
     --executable /usr/bin/notify-send \
     --desktop-file AppDir/usr/share/applications/net.playhi.fast-screen-off.desktop \
     --icon-file AppDir/usr/share/icons/hicolor/scalable/apps/net.playhi.fast-screen-off.svg \

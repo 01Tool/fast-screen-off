@@ -45,6 +45,7 @@
     {
       "name": "wlopm",
       "buildsystem": "simple",
+      "build-options": {"cflags": "-std=gnu17"},
       "build-commands": [
         "make -j2",
         "make PREFIX=/app install",

@@ -39,6 +39,8 @@ stages it alongside the application source, builds pinned libXt/libXmu, xset, wl
 KScreen sources, and copies the SDK's gdbus tool for use with its matching
 runtime libraries. KDE supplies Qt and its platform plugins, avoiding host Qt
 dependencies. The generated bundle records Flathub as the runtime repository.
+The wlopm module uses C17 because its pinned release predates the C23 change
+to empty function parameter lists in newer SDK compilers.
 
 CI uses Flathub's official KDE 6.10 container, pinned by digest, with both the
 SDK and runtime preinstalled. Its documented privileged container setting

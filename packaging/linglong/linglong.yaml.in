@@ -17,6 +17,9 @@ build: |
   set -eu
   cd /project/source
   sh install.sh "$PREFIX"
+  # APT dependencies are relocated from /usr into the application prefix.
+  # Point Qt at that prefix so both offscreen checks and Wayland find plugins.
+  printf '[Paths]\nPrefix=..\nPlugins=lib/%s/qt6/plugins\n' "$TRIPLET" > "$PREFIX/bin/qt.conf"
   cd /project/linglong/sources/wlopm/wlopm-0.1.0
   make -j2
   make PREFIX="$PREFIX" install
@@ -32,4 +35,5 @@ buildext:
       - libglib2.0-bin
       - libnotify-bin
       - libkscreen-bin
+      - qt6-qpa-plugins
       - qt6-wayland

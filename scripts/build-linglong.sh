@@ -6,7 +6,12 @@ output=${1:-"$root/assets"}
 mkdir -p "$output"
 output=$(CDPATH='' cd -- "$output" && pwd)
 work=$(mktemp -d)
-trap 'rm -rf -- "$work"' EXIT HUP INT TERM
+cleanup() {
+    # Overlayfs creates its private work directory with mode 000.
+    chmod -R u+rwX "$work/linglong/cache/overlay/workdir" 2>/dev/null || :
+    rm -rf -- "$work" || printf 'Could not fully remove build directory: %s\n' "$work" >&2
+}
+trap cleanup EXIT HUP INT TERM
 version=$(python3 "$root/scripts/prepare-portable.py" linglong "$work")
 cd "$work"
 ll-builder build

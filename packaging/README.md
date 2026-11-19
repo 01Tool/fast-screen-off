@@ -59,7 +59,8 @@ dbus-run-session -- sh scripts/build-linglong.sh
 ```
 
 The recipe targets the 1.14 builder and `org.deepin.base/25.2.2`. It uses the
-builder's APT extension to include the display helpers and Qt 6 Wayland support,
+builder's APT extension to include the display helpers and Qt 6 platform plugins,
+with `qt.conf` pointing at their relocated directory. It includes Wayland support
 and builds wlopm from a pinned source archive because it is not available in
 every Deepin APT repository. The build runs headless helper checks in the
 generated runtime before exporting a distribution `.uab`.

@@ -62,8 +62,8 @@
       "buildsystem": "cmake-ninja",
       "sources": [{
         "type": "archive",
-        "url": "https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.16.0.tar.xz",
-        "sha256": "da3fbbe3fa5603f9dc9aabe948a6fc8c3b451edd1958138628e96c83649c1f16"
+        "url": "https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.19.0.tar.xz",
+        "sha256": "45679fe7a63c414f2c81793a62528fae6ccee584b6965719d7f9fc6dd48ba846"
       }]
     },
     {
@@ -72,8 +72,8 @@
       "config-opts": ["-DBUILD_TESTING=OFF", "-DBUILD_QCH=OFF"],
       "sources": [{
         "type": "archive",
-        "url": "https://download.kde.org/stable/plasma/6.3.6/libkscreen-6.3.6.tar.xz",
-        "sha256": "b23cc6dc51c970e4512372e6bef06f5378fcfcd79fa0178b66b81f06308a2490"
+        "url": "https://download.kde.org/stable/plasma/6.5.6/libkscreen-6.5.6.tar.xz",
+        "sha256": "cde8f131024d44b67db22ee532ca01b1955422839825dc633bc84185a6728945"
       }],
       "post-install": ["mkdir -p /app/share/licenses/libkscreen", "cp -r LICENSES/. /app/share/licenses/libkscreen/"]
     },

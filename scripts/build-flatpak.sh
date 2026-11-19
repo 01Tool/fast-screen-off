@@ -9,7 +9,7 @@ work=$(mktemp -d)
 trap 'rm -rf -- "$work"' EXIT HUP INT TERM
 version=$(python3 "$root/scripts/prepare-portable.py" flatpak "$work")
 cd "$work"
-flatpak-builder --user --install --force-clean --repo=repo build net.playhi.fast-screen-off.json
+flatpak-builder --disable-rofiles-fuse --user --install --force-clean --repo=repo build net.playhi.fast-screen-off.json
 flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo \
     repo "$output/fast-screen-off_${version}_x86_64.flatpak" net.playhi.fast-screen-off
 flatpak run --command=sh net.playhi.fast-screen-off /app/libexec/fast-screen-off/check-runtime.sh

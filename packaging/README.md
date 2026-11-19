@@ -46,6 +46,8 @@ CI uses Flathub's official KDE 6.10 container, pinned by digest, with both the
 SDK and runtime preinstalled. Its documented privileged container setting
 allows Flatpak's nested namespaces on the disposable GitHub runner; the
 application's own sandbox permissions remain those in the manifest.
+The optional rofiles-fuse build-cache optimization is disabled so builds also
+work in containers without its host-spawn integration.
 
 The build script installs the app into the invoking user's Flatpak installation
 to test its helpers in the actual sandbox. Use a disposable build user if you

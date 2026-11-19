@@ -1,0 +1,69 @@
+{
+  "app-id": "net.playhi.fast-screen-off",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "6.10",
+  "sdk": "org.kde.Sdk",
+  "command": "fast-screen-off",
+  "finish-args": [
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--share=ipc",
+    "--talk-name=org.gnome.Mutter.DisplayConfig",
+    "--talk-name=org.freedesktop.Notifications"
+  ],
+  "cleanup": ["/include", "/lib/cmake", "/lib/pkgconfig", "/share/man", "*.a", "*.la"],
+  "modules": [
+    {
+      "name": "xset",
+      "sources": [{
+        "type": "archive",
+        "url": "https://xorg.freedesktop.org/archive/individual/app/xset-1.2.5.tar.xz",
+        "sha256": "9f692d55635b3862cd63633b1222a87680ec283c7a8e8ed6dd698a3147f75e2f"
+      }],
+      "post-install": ["install -Dm644 COPYING /app/share/licenses/xset/COPYING"]
+    },
+    {
+      "name": "wlopm",
+      "buildsystem": "simple",
+      "build-commands": [
+        "make -j2",
+        "make PREFIX=/app install",
+        "install -Dm644 LICENSE /app/share/licenses/wlopm/LICENSE"
+      ],
+      "sources": [{
+        "type": "archive",
+        "url": "https://deb.debian.org/debian/pool/main/w/wlopm/wlopm_0.1.0.orig.tar.gz",
+        "sha256": "1f3d7d3ff5d43de634b87e6ca951238ad8bef9ef6bdea5b904b8293f7f000fb1"
+      }]
+    },
+    {
+      "name": "plasma-wayland-protocols",
+      "buildsystem": "cmake-ninja",
+      "sources": [{
+        "type": "archive",
+        "url": "https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.16.0.tar.xz",
+        "sha256": "da3fbbe3fa5603f9dc9aabe948a6fc8c3b451edd1958138628e96c83649c1f16"
+      }]
+    },
+    {
+      "name": "libkscreen",
+      "buildsystem": "cmake-ninja",
+      "config-opts": ["-DBUILD_TESTING=OFF", "-DBUILD_QCH=OFF"],
+      "sources": [{
+        "type": "archive",
+        "url": "https://download.kde.org/stable/plasma/6.3.6/libkscreen-6.3.6.tar.xz",
+        "sha256": "b23cc6dc51c970e4512372e6bef06f5378fcfcd79fa0178b66b81f06308a2490"
+      }],
+      "post-install": ["mkdir -p /app/share/licenses/libkscreen", "cp -r LICENSES/. /app/share/licenses/libkscreen/"]
+    },
+    {
+      "name": "fast-screen-off",
+      "buildsystem": "simple",
+      "build-commands": [
+        "sh install.sh /app",
+        "install -Dm755 /usr/bin/gdbus /app/bin/gdbus"
+      ],
+      "sources": [{"type": "dir", "path": "source"}]
+    }
+  ]
+}

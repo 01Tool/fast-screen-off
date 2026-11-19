@@ -1,4 +1,4 @@
-name: Build Debian and Deepin packages
+name: Build Linux release packages
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
           persist-credentials: false
       - name: Check source and backend behavior
         run: |
-          shellcheck -s sh net.playhi.fast-screen-off/deepin/files/bin/net.playhi.fast-screen-off.sh scripts/build-deb.sh
+          shellcheck -s sh net.playhi.fast-screen-off/deepin/files/bin/net.playhi.fast-screen-off.sh scripts/*.sh packaging/common/*.sh
           python3 -m unittest discover -s tests -v
           desktop-file-validate net.playhi.fast-screen-off/deepin/entries/applications/net.playhi.fast-screen-off.desktop
       - name: Check release tag matches the package version
@@ -72,10 +72,78 @@ jobs:
           path: assets/*.deb
           if-no-files-found: error
 
+  appimage:
+    name: AppImage (x86_64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container: debian:12
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install packaging tools and helpers
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl git python3 file patchelf desktop-file-utils x11-xserver-utils libglib2.0-bin libnotify-bin wlopm libkf5screen-bin qt5-qmake qtbase5-dev qtwayland5 libqt5svg5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Bundle helpers and build AppImage
+        run: sh scripts/build-appimage.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fast-screen-off-appimage
+          path: assets/*.AppImage
+          if-no-files-found: error
+
+  flatpak:
+    name: Flatpak (x86_64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Flatpak SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder dbus-x11
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user --noninteractive flathub org.kde.Sdk//6.10 org.kde.Platform//6.10
+      - name: Build bundle and check helpers inside the sandbox
+        run: dbus-run-session -- sh scripts/build-flatpak.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fast-screen-off-flatpak
+          path: assets/*.flatpak
+          if-no-files-found: error
+
+  linglong:
+    name: Linglong (x86_64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the official Linglong release builder
+        run: |
+          # Upstream's release repository uses HTTPS but does not provide APT signatures.
+          echo 'deb [trusted=yes] https://ci.deepin.com/repo/obs/linglong:/CI:/release/Ubuntu_24.04/ ./' | sudo tee /etc/apt/sources.list.d/linglong.list
+          sudo apt-get update
+          sudo apt-get install -y linglong-builder linglong-bin dbus-x11
+          ll-builder --version
+      - name: Build UAB and check helpers inside the runtime
+        run: dbus-run-session -- sh scripts/build-linglong.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fast-screen-off-linglong
+          path: assets/*.uab
+          if-no-files-found: error
+
   release:
     name: Publish release assets
     if: startsWith(github.ref, 'refs/tags/')
-    needs: package
+    needs: [package, appimage, flatpak, linglong]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -99,7 +167,10 @@ jobs:
           cd assets
           test -s "net.playhi.fast-screen-off_${version}_debian13_all.deb"
           test -s "net.playhi.fast-screen-off_${version}_deepin25_all.deb"
-          sha256sum ./*.deb > SHA256SUMS
+          test -s "fast-screen-off_${version}_x86_64.AppImage"
+          test -s "fast-screen-off_${version}_x86_64.flatpak"
+          test -s "fast-screen-off_${version}_x86_64.uab"
+          sha256sum ./*.deb ./*.AppImage ./*.flatpak ./*.uab > SHA256SUMS
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             if [ -f "$notes_file" ]; then
               gh release create "$RELEASE_TAG" --draft --verify-tag --title "Fast Screen Off $RELEASE_TAG" --notes-file "$notes_file"
@@ -107,7 +178,7 @@ jobs:
               gh release create "$RELEASE_TAG" --draft --verify-tag --title "Fast Screen Off $RELEASE_TAG" --generate-notes
             fi
           fi
-          gh release upload "$RELEASE_TAG" ./*.deb SHA256SUMS --clobber
+          gh release upload "$RELEASE_TAG" ./*.deb ./*.AppImage ./*.flatpak ./*.uab SHA256SUMS --clobber
           if [ -f "$notes_file" ]; then
             gh release edit "$RELEASE_TAG" --notes-file "$notes_file"
           fi

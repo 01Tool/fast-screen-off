@@ -60,6 +60,54 @@ fast-screen-off --delay 1          # Debian command
 Both commands accept `--help`, `--version` and `--delay SECONDS`. Remove with
 `sudo apt remove net.playhi.fast-screen-off` or your system's software manager.
 
+## AppImage, Flatpak and Linglong
+
+The latest workflow builds these additional **x86_64** artifacts. They will be
+included in future tagged releases; the previously published v2.0.0.0 release
+contains only the two `.deb` packages. Branch builds are available under the
+workflow run's **Artifacts** section.
+
+| Format | Artifact | Requirements |
+| --- | --- | --- |
+| AppImage | `fast-screen-off_<version>_x86_64.AppImage` | Desktop Linux with glibc 2.36 or newer; FUSE, or extraction mode |
+| Flatpak | `fast-screen-off_<version>_x86_64.flatpak` | Flatpak and the KDE 6.10 runtime from Flathub |
+| Linglong / Linyaps | `fast-screen-off_<version>_x86_64.uab` | Linyaps 1.14 or newer and access to its base repository |
+
+These packages include `xset`, `gdbus`, `wlopm` and `kscreen-doctor` through
+bundled dependencies or their declared runtime. Desktop/compositor power-control
+support is still required. Flatpak grants the X11/Wayland sockets, shared IPC,
+and access to the Mutter display and notification D-Bus services. Linglong uses
+its desktop runtime integration; custom runtime policies can restrict access to
+the session bus or display sockets.
+
+```sh
+# Set VERSION to match your downloaded workflow/release artifact.
+VERSION=2.0.0.0
+# AppImage
+chmod +x "fast-screen-off_${VERSION}_x86_64.AppImage"
+./fast-screen-off_${VERSION}_x86_64.AppImage
+# If FUSE is unavailable:
+APPIMAGE_EXTRACT_AND_RUN=1 ./fast-screen-off_${VERSION}_x86_64.AppImage
+
+# Flatpak
+flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install --user ./fast-screen-off_${VERSION}_x86_64.flatpak
+flatpak run net.playhi.fast-screen-off
+
+# Linglong: install distribution UABs instead of executing them directly
+ll-cli install ./fast-screen-off_${VERSION}_x86_64.uab
+ll-cli run net.playhi.fast-screen-off
+```
+
+CI runs headless helper checks inside Flatpak and the Linglong build runtime,
+and checks the AppImage launcher and bundled helper programs. These checks do
+not switch off a monitor. Real display-off/wake-up testing on GNOME, Plasma and
+Deepin/Treeland is still needed before claiming verified desktop compatibility
+for these formats. Store submission and Snap packaging are separate work.
+
+See [packaging instructions and dependency sources](packaging/README.md) for
+local builds, runtime choices and troubleshooting.
+
 ## Build `.deb` assets locally
 
 On Debian 13 or Deepin 25, install the build tools and run from the repository root:
@@ -87,17 +135,18 @@ pushes to `master`/`main`, version tags, and manual dispatch. It builds in
 `debian:13` and `linuxdeepin/deepin:25` containers, runs ShellCheck and backend
 tests, validates the actual package contents and desktop entry, and installs and
 purges each package in its target container. Each job uploads a downloadable
-workflow artifact containing its `.deb`.
+workflow artifact. Separate jobs build AppImage, Flatpak and Linglong packages
+and check their helper commands.
 
 To release:
 
 1. Update the version together in `debian/changelog`, `deepin/info`, and the
    launcher's `--version` string, all under `net.playhi.fast-screen-off/`.
 2. Add release notes under `docs/releases/<tag>.md`, then commit and push the
-   changes. Wait for both package jobs to pass before pushing the matching tag,
-   e.g. `v2.0.0.0`.
-3. After both tag package jobs pass, the workflow creates a draft GitHub release
-   (or uses the existing one), uploads both `.deb` files and `SHA256SUMS`, and
+   changes. Wait for all package jobs to pass before pushing a new matching tag.
+   Published tags must not be moved or reused for the added formats.
+3. After all tag package jobs pass, the workflow creates a draft GitHub release
+   (or uses the existing one), uploads all five package files and `SHA256SUMS`, and
    publishes the release. If no notes file exists, GitHub generates the notes.
 
 Tags must exactly match the package version: use `v2.0.0.0` for package version

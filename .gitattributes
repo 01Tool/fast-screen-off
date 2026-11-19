@@ -2,6 +2,7 @@
 *.sh text eol=lf
 *.py text eol=lf
 *.yml text eol=lf
+*.yaml.in text eol=lf
 *.desktop text eol=lf
 net.playhi.fast-screen-off/debian/* text eol=lf
 net.playhi.fast-screen-off/deepin/info text eol=lf

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>net.playhi.fast-screen-off</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>Fast Screen Off</name>
+  <name xml:lang="zh_CN">快速熄屏</name>
+  <summary>Turn off your displays with one click</summary>
+  <description>
+    <p>Fast Screen Off requests display power-off in X11 and supported Wayland
+    sessions. It supports GNOME, KDE Plasma, and compositors implementing the
+    Wayland output-power-management protocol, such as Treeland.</p>
+    <p>The application does not suspend your computer or change idle timers.
+    Display power management depends on your desktop and graphics driver.</p>
+  </description>
+  <launchable type="desktop-id">net.playhi.fast-screen-off.desktop</launchable>
+  <url type="homepage">https://github.com/01Tool/fast-screen-off</url>
+  <url type="bugtracker">https://github.com/01Tool/fast-screen-off/issues</url>
+  <developer id="net.playhi"><name>Playhi</name></developer>
+  <provides><binary>fast-screen-off</binary></provides>
+  <content_rating type="oars-1.1"/>
+</component>

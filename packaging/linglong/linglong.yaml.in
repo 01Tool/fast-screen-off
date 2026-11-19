@@ -1,0 +1,35 @@
+version: "1"
+package:
+  id: net.playhi.fast-screen-off
+  name: Fast Screen Off
+  version: @VERSION@
+  kind: app
+  description: Turn off displays in X11 and supported Wayland sessions.
+base: org.deepin.base/25.2.2
+command:
+  - /opt/apps/net.playhi.fast-screen-off/files/bin/fast-screen-off
+sources:
+  - kind: archive
+    name: wlopm
+    url: https://deb.debian.org/debian/pool/main/w/wlopm/wlopm_0.1.0.orig.tar.gz
+    digest: 1f3d7d3ff5d43de634b87e6ca951238ad8bef9ef6bdea5b904b8293f7f000fb1
+build: |
+  set -eu
+  cd /project/source
+  sh install.sh "$PREFIX"
+  cd /project/linglong/sources/wlopm/wlopm-0.1.0
+  make -j2
+  make PREFIX="$PREFIX" install
+  install -Dm644 LICENSE "$PREFIX/share/licenses/wlopm/LICENSE"
+buildext:
+  apt:
+    build_depends:
+      - build-essential
+      - libwayland-dev
+      - pkg-config
+    depends:
+      - x11-xserver-utils
+      - libglib2.0-bin
+      - libnotify-bin
+      - libkscreen-bin
+      - qt6-wayland

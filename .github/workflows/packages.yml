@@ -130,7 +130,7 @@ jobs:
           # Upstream's release repository uses HTTPS but does not provide APT signatures.
           echo 'deb [trusted=yes] https://ci.deepin.com/repo/obs/linglong:/CI:/release/Ubuntu_24.04/ ./' | sudo tee /etc/apt/sources.list.d/linglong.list
           sudo apt-get update
-          sudo apt-get install -y linglong-builder linglong-bin dbus-x11
+          sudo apt-get install -y linglong-builder linglong-bin linglong-box dbus-x11
           ll-builder --version
       - name: Build UAB and check helpers inside the runtime
         run: sh scripts/ci-run.sh dbus-run-session -- sh scripts/build-linglong.sh

@@ -35,7 +35,7 @@ dbus-run-session -- sh scripts/build-flatpak.sh
 ```
 
 The source manifest is `flatpak/net.playhi.fast-screen-off.json`. The script
-stages it alongside the application source, builds pinned xset, wlopm and
+stages it alongside the application source, builds pinned libXt/libXmu, xset, wlopm and
 KScreen sources, and copies the SDK's gdbus tool for use with its matching
 runtime libraries. KDE supplies Qt and its platform plugins, avoiding host Qt
 dependencies. The generated bundle records Flathub as the runtime repository.
@@ -51,7 +51,7 @@ No host-spawn permission or broad session-bus permission is requested.
 
 ## Linglong / Linyaps
 
-Install `linglong-builder` and `linglong-bin` following the official Linyaps
+Install `linglong-builder`, `linglong-bin` and `linglong-box` following the official Linyaps
 instructions, then run:
 
 ```sh
@@ -89,6 +89,8 @@ Build failures cannot silently produce a partial release.
 - [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy/releases/tag/1-alpha-20251107-1)
 - [linuxdeploy Qt plugin](https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/tag/1-alpha-20250213-1)
 - [xset 1.2.5](https://xorg.freedesktop.org/archive/individual/app/xset-1.2.5.tar.xz)
+- [libXt 1.3.1](https://xorg.freedesktop.org/archive/individual/lib/libXt-1.3.1.tar.xz)
+- [libXmu 1.2.1](https://xorg.freedesktop.org/archive/individual/lib/libXmu-1.2.1.tar.xz)
 - [wlopm 0.1.0 source](https://deb.debian.org/debian/pool/main/w/wlopm/wlopm_0.1.0.orig.tar.gz)
 - [Plasma Wayland protocols 1.16.0](https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.16.0.tar.xz)
 - [KScreen 6.3.6 source](https://download.kde.org/stable/plasma/6.3.6/libkscreen-6.3.6.tar.xz)

@@ -40,6 +40,11 @@ KScreen sources, and copies the SDK's gdbus tool for use with its matching
 runtime libraries. KDE supplies Qt and its platform plugins, avoiding host Qt
 dependencies. The generated bundle records Flathub as the runtime repository.
 
+CI uses Flathub's official KDE 6.10 container, pinned by digest, with both the
+SDK and runtime preinstalled. Its documented privileged container setting
+allows Flatpak's nested namespaces on the disposable GitHub runner; the
+application's own sandbox permissions remain those in the manifest.
+
 The build script installs the app into the invoking user's Flatpak installation
 to test its helpers in the actual sandbox. Use a disposable build user if you
 already have the same app installed. Remove the test installation with
@@ -97,10 +102,11 @@ Build failures cannot silently produce a partial release.
 - [KScreen 6.3.6 source](https://download.kde.org/stable/plasma/6.3.6/libkscreen-6.3.6.tar.xz)
 - [KDE runtime sources, including GLib/gdbus](https://invent.kde.org/packaging/flatpak-kde-runtime/-/tree/qt6.10)
 - [Flatpak permissions](https://docs.flatpak.org/en/latest/sandbox-permissions.html)
+- [Official Flatpak CI images](https://github.com/flathub-infra/actions-images)
 - [Linyaps manifest and APT extension](https://linglong.dev/en/guide/building/manifests.html)
 - [Linyaps installation repositories](https://linglong.dev/en/guide/start/install.html)
 
-Archive checksums live in the manifests and AppImage script. Runtime/base
-updates and new architectures require rebuilding and repeating the checks.
+Archive checksums live in the manifests and AppImage script. Runtime/base and
+CI image updates, and new architectures, require rebuilding and repeating the checks.
 Publishing to Flathub or the Linyaps store needs its own metadata/review process;
 these recipes produce downloadable GitHub assets.

@@ -99,16 +99,20 @@ jobs:
     name: Flatpak (x86_64)
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10@sha256:62920cbbb53c4e047801562c0475d70393482de9698dfeac740aad99e6c674e6
+      # Flatpak's documented container setup needs nested namespaces.
+      options: --privileged
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install Flatpak SDK
+      - name: Verify the preinstalled Flatpak SDK
         run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder dbus-x11
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user --noninteractive flathub org.kde.Sdk//6.10 org.kde.Platform//6.10
+          flatpak --version
+          flatpak-builder --version
+          flatpak info org.kde.Sdk//6.10
+          flatpak info org.kde.Platform//6.10
       - name: Build bundle and check helpers inside the sandbox
         run: sh scripts/ci-run.sh dbus-run-session -- sh scripts/build-flatpak.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -127,11 +131,13 @@ jobs:
           persist-credentials: false
       - name: Install the official Linglong release builder
         run: |
-          # Upstream's release repository uses HTTPS but does not provide APT signatures.
-          echo 'deb [trusted=yes] https://ci.deepin.com/repo/obs/linglong:/CI:/release/Ubuntu_24.04/ ./' | sudo tee /etc/apt/sources.list.d/linglong.list
-          sudo apt-get update
-          sudo apt-get install -y linglong-builder linglong-bin linglong-box dbus-x11
-          ll-builder --version
+          sh scripts/ci-run.sh sh -eu -c '
+            # The upstream HTTPS repository does not provide APT signatures.
+            echo "deb [trusted=yes] https://ci.deepin.com/repo/obs/linglong:/CI:/release/Ubuntu_24.04/ ./" | sudo tee /etc/apt/sources.list.d/linglong.list
+            sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+            sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y linglong-builder linglong-bin linglong-box dbus-x11
+            ll-builder --version
+          '
       - name: Build UAB and check helpers inside the runtime
         run: sh scripts/ci-run.sh dbus-run-session -- sh scripts/build-linglong.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
